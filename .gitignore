@@ -1,0 +1,37 @@
+# Eclipse IDE
+.project
+.classpath
+.settings/
+.metadata/
+bin/
+target/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+
+# Compiled class files
+*.class
+
+# Log files
+*.log
+
+# Package files
+*.jar
+*.war
+*.ear
+*.rar
+
+# GlassFish / Payara
+glassfish/domains/domain1/generated/
+glassfish/domains/domain1/logs/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Build directories
+build/
+out/
