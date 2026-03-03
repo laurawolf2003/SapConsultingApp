@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<ui:composition template="/template.xhtml">
+
+    <ui:define name="title">Berater-Detail - SAP Consulting App</ui:define>
+    <ui:define name="heading">Berater-Detail &amp; Skills</ui:define>
+
+    <ui:define name="content">
+        <h:form id="detailForm">
+            <f:metadata>
+                <f:viewParam name="id" value="#{beraterController.ausgewaehlterBerater}"
+                             converter="beraterConverter" />
+            </f:metadata>
+
+            <div class="section">
+                <h2>#{beraterController.ausgewaehlterBerater.vollerName}</h2>
+                <p><strong>E-Mail:</strong> #{beraterController.ausgewaehlterBerater.email}</p>
+                <p><strong>Senioritaet:</strong> #{beraterController.ausgewaehlterBerater.senioritaet}</p>
+                <p><strong>Stundensatz:</strong> #{beraterController.ausgewaehlterBerater.stundensatz} EUR</p>
+                <p><strong>Verfuegbar:</strong> #{beraterController.ausgewaehlterBerater.verfuegbar ? 'Ja' : 'Nein'}</p>
+            </div>
+
+            <!-- Skills des Beraters -->
+            <div class="section">
+                <h2>Skills</h2>
+                <h:dataTable value="#{beraterController.ausgewaehlterBerater.skills}" var="s"
+                             styleClass="" headerClass="" rowClasses="">
+                    <h:column>
+                        <f:facet name="header">SAP-Modul</f:facet>
+                        #{s.sapModul} - #{s.sapModul.bezeichnung}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Level</f:facet>
+                        #{s.level} / 5
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Zertifiziert</f:facet>
+                        #{s.zertifiziert ? 'Ja' : 'Nein'}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Aktion</f:facet>
+                        <h:commandButton value="Entfernen" action="#{beraterController.skillEntfernen(s.id)}"
+                                         styleClass="btn btn-danger" />
+                    </h:column>
+                </h:dataTable>
+
+                <!-- Skill hinzufuegen -->
+                <h3>Neuen Skill zuweisen</h3>
+                <div class="form-group">
+                    <h:outputLabel for="skillModul" value="SAP-Modul:" />
+                    <h:selectOneMenu id="skillModul" value="#{beraterController.neuerSkillModul}">
+                        <f:selectItem itemLabel="-- Modul waehlen --" itemValue="" noSelectionOption="true" />
+                        <f:selectItems value="#{beraterController.sapModule}" var="m"
+                                       itemLabel="#{m} - #{m.bezeichnung}" itemValue="#{m}" />
+                    </h:selectOneMenu>
+                </div>
+                <div class="form-group">
+                    <h:outputLabel for="skillLevel" value="Level (1-5):" />
+                    <h:inputText id="skillLevel" value="#{beraterController.neuerSkillLevel}" />
+                </div>
+                <div class="form-group">
+                    <h:outputLabel for="zertifiziert" value="Zertifiziert:" />
+                    <h:selectBooleanCheckbox id="zertifiziert" value="#{beraterController.neuerSkillZertifiziert}" />
+                </div>
+                <h:commandButton value="Skill zuweisen" action="#{beraterController.skillZuweisen}"
+                                 styleClass="btn btn-success" />
+            </div>
+
+            <h:link value="Zurueck zur Beraterliste" outcome="/berater.xhtml" styleClass="btn" />
+        </h:form>
+    </ui:define>
+
+</ui:composition>
+</html>

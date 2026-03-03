@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
+                                 http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd"
+             version="2.1">
+
+    <persistence-unit name="SapConsultingPU" transaction-type="JTA">
+        <jta-data-source>jdbc/SapConsultingDS</jta-data-source>
+
+        <!-- Entity-Klassen explizit auflisten -->
+        <class>de.consulting.model.Kunde</class>
+        <class>de.consulting.model.Projekt</class>
+        <class>de.consulting.model.Berater</class>
+        <class>de.consulting.model.Skill</class>
+        <class>de.consulting.model.Zeiteintrag</class>
+
+        <exclude-unlisted-classes>true</exclude-unlisted-classes>
+
+        <properties>
+            <!-- Schema-Generierung: drop-and-create fuer Entwicklung -->
+            <property name="javax.persistence.schema-generation.database.action"
+                      value="drop-and-create"/>
+
+            <!-- EclipseLink-spezifische Einstellungen -->
+            <property name="eclipselink.logging.level" value="FINE"/>
+            <property name="eclipselink.target-database" value="MySQL"/>
+        </properties>
+    </persistence-unit>
+
+</persistence>

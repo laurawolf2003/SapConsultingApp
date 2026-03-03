@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<ui:composition template="/template.xhtml">
+
+    <ui:define name="title">Kunden - SAP Consulting App</ui:define>
+    <ui:define name="heading">Kundenverwaltung</ui:define>
+
+    <ui:define name="content">
+        <!-- Formular: Kunde anlegen / bearbeiten -->
+        <div class="section">
+            <h2>#{empty projektController.ausgewaehltesProjekt.id ? 'Neuen Kunden anlegen' : 'Kunden bearbeiten'}</h2>
+            <h:form id="kundeForm">
+                <div class="form-group">
+                    <h:outputLabel for="firmenname" value="Firmenname:" />
+                    <h:inputText id="firmenname" value="#{kundeController.ausgewaehlterKunde.firmenname}"
+                                 required="true" requiredMessage="Firmenname ist erforderlich" />
+                </div>
+                <div class="form-group">
+                    <h:outputLabel for="branche" value="Branche:" />
+                    <h:inputText id="branche" value="#{kundeController.ausgewaehlterKunde.branche}" />
+                </div>
+                <div class="form-group">
+                    <h:outputLabel for="ansprechpartner" value="Ansprechpartner:" />
+                    <h:inputText id="ansprechpartner" value="#{kundeController.ausgewaehlterKunde.ansprechpartner}" />
+                </div>
+                <div class="form-group">
+                    <h:outputLabel for="adresse" value="Adresse:" />
+                    <h:inputText id="adresse" value="#{kundeController.ausgewaehlterKunde.adresse}" />
+                </div>
+                <div class="form-group">
+                    <h:outputLabel for="email" value="E-Mail:" />
+                    <h:inputText id="email" value="#{kundeController.ausgewaehlterKunde.email}" />
+                </div>
+                <h:commandButton value="Speichern" action="#{kundeController.speichern}"
+                                 styleClass="btn btn-primary" />
+                <h:commandButton value="Abbrechen" action="#{kundeController.neuerKunde}"
+                                 styleClass="btn" immediate="true" />
+            </h:form>
+        </div>
+
+        <!-- Tabelle: Alle Kunden -->
+        <div class="section">
+            <h2>Kundenliste</h2>
+            <h:form id="kundenListe">
+                <h:dataTable value="#{kundeController.kunden}" var="k"
+                             styleClass="" headerClass="" rowClasses="">
+                    <h:column>
+                        <f:facet name="header">Firmenname</f:facet>
+                        #{k.firmenname}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Branche</f:facet>
+                        #{k.branche}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Ansprechpartner</f:facet>
+                        #{k.ansprechpartner}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">E-Mail</f:facet>
+                        #{k.email}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Aktionen</f:facet>
+                        <h:commandButton value="Bearbeiten" action="#{kundeController.bearbeiten(k)}"
+                                         styleClass="btn btn-primary" />
+                        <h:commandButton value="Loeschen" action="#{kundeController.loeschen(k.id)}"
+                                         styleClass="btn btn-danger"
+                                         onclick="return confirm('Wirklich loeschen?');" />
+                    </h:column>
+                </h:dataTable>
+            </h:form>
+        </div>
+    </ui:define>
+
+</ui:composition>
+</html>
