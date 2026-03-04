@@ -35,6 +35,12 @@ local.properties
 *.ear
 *.rar
 
+# Tools-Ordner komplett ins Repo (nichts ignorieren)
+!tools/**
+
+# GlassFish-Installation komplett ins Repo (nichts ignorieren)
+!glassfish5/**
+
 # GlassFish / Payara
 glassfish/domains/domain1/generated/
 glassfish/domains/domain1/logs/

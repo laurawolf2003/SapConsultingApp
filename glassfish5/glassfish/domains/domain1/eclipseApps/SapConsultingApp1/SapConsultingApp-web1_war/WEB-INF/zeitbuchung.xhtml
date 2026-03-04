@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<ui:composition template="/template.xhtml">
+
+	<ui:define name="title">Zeitbuchung - SAP Consulting App</ui:define>
+	<ui:define name="heading">Zeiterfassung</ui:define>
+
+	<ui:define name="content">
+		<!-- Formular: Neue Zeitbuchung -->
+		<div class="section">
+			<h2>Neue Zeitbuchung</h2>
+			<form action="#{request.contextPath}/zeitbuchung" method="post">
+				<div class="form-group">
+					<label for="projektId">Projekt (nur aktive):</label>
+					<select id="projektId" name="projektId" required="required">
+						<option value="">-- Projekt waehlen --</option>
+						<ui:repeat value="#{requestScope.aktiveProjekte}" var="p">
+							<option value="#{p.id}"
+								selected="#{requestScope.ausgewaehltesProjektId == p.id ? 'selected' : null}">
+								#{p.bezeichnung} (#{p.kunde.firmenname})
+							</option>
+						</ui:repeat>
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="beraterId">Berater:</label>
+					<select id="beraterId" name="beraterId" required="required">
+						<option value="">-- Berater waehlen --</option>
+						<ui:repeat value="#{requestScope.alleBerater}" var="b">
+							<option value="#{b.id}">#{b.vollerName}</option>
+						</ui:repeat>
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="datum">Datum (TT.MM.JJJJ):</label>
+					<input type="text" id="datum" name="datum" required="required" placeholder="31.12.2025" />
+				</div>
+				<div class="form-group">
+					<label for="stunden">Stunden:</label>
+					<input type="text" id="stunden" name="stunden" required="required" placeholder="8.0" />
+				</div>
+				<div class="form-group">
+					<label for="beschreibung">Taetigkeit:</label>
+					<textarea id="beschreibung" name="beschreibung" rows="2"></textarea>
+				</div>
+				<div class="form-group">
+					<label for="abrechenbar">Abrechenbar:</label>
+					<input type="checkbox" id="abrechenbar" name="abrechenbar" checked="checked" />
+				</div>
+				<input type="submit" value="Buchen" class="btn btn-primary" />
+			</form>
+		</div>
+
+		<!-- Tabelle: Zeiteintraege des gewaehlten Projekts -->
+		<div class="section">
+			<h2>Zeiteintraege</h2>
+			<h:dataTable value="#{requestScope.zeiteintraege}" var="z" styleClass="" headerClass="" rowClasses="">
+				<h:column>
+					<f:facet name="header">Datum</f:facet>
+					<h:outputText value="#{z.datum}">
+						<f:convertDateTime pattern="dd.MM.yyyy" />
+					</h:outputText>
+				</h:column>
+				<h:column>
+					<f:facet name="header">Berater</f:facet>
+					#{z.berater.vollerName}
+				</h:column>
+				<h:column>
+					<f:facet name="header">Stunden</f:facet>
+					#{z.stunden}
+				</h:column>
+				<h:column>
+					<f:facet name="header">Taetigkeit</f:facet>
+					#{z.beschreibung}
+				</h:column>
+				<h:column>
+					<f:facet name="header">Abrechenbar</f:facet>
+					#{z.abrechenbar ? 'Ja' : 'Nein'}
+				</h:column>
+			</h:dataTable>
+		</div>
+	</ui:define>
+
+</ui:composition>
+
+</html>

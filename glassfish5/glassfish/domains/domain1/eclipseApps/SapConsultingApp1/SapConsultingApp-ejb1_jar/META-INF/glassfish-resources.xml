@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE resources PUBLIC
+    "-//GlassFish.org//DTD GlassFish Application Server 3.1 Resource Definitions//EN"
+    "http://glassfish.org/dtds/glassfish-resources_1_5.dtd">
+<resources>
+    <!--
+        JDBC Connection Pool fuer MySQL.
+        Passe ServerName, DatabaseName, User und Password an deine lokale MySQL-Instanz an.
+        Der MySQL JDBC-Treiber (mysql-connector-java.jar) muss in
+        $PAYARA_HOME/glassfish/domains/domain1/lib/ liegen.
+    -->
+    <jdbc-connection-pool
+        name="SapConsultingPool"
+        datasource-classname="com.mysql.cj.jdbc.MysqlDataSource"
+        res-type="javax.sql.DataSource"
+        pool-resize-quantity="2"
+        steady-pool-size="2"
+        max-pool-size="10">
+        <property name="ServerName" value="localhost"/>
+        <property name="PortNumber" value="3306"/>
+        <property name="DatabaseName" value="sap_consulting"/>
+        <property name="User" value="root"/>
+        <property name="Password" value="root"/>
+        <property name="useSSL" value="false"/>
+        <property name="serverTimezone" value="UTC"/>
+    </jdbc-connection-pool>
+
+    <jdbc-resource
+        pool-name="SapConsultingPool"
+        jndi-name="jdbc/SapConsultingDS"/>
+</resources>
