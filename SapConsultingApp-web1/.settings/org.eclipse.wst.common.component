@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-modules id="modulecoreproject" project-version="1.5.0">
+	<wb-module deploy-name="SapConsultingApp-web1">
+		<wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
+		<wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
+		<property name="context-root" value="SapConsultingApp"/>
+		<property name="java-output-path" value="/SapConsultingApp-web1/build/classes"/>
+	</wb-module>
+</project-modules>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-modules id="modulecoreproject" project-version="1.5.0">
+	<wb-module deploy-name="SapConsultingApp1">
+		<wb-resource deploy-path="/" source-path="/EarContent"/>
+		<dependent-module archiveName="SapConsultingApp-ejb1.jar" deploy-path="/" handle="module:/resource/SapConsultingApp-ejb1/SapConsultingApp-ejb1">
+			<dependency-type>uses</dependency-type>
+		</dependent-module>
+		<dependent-module archiveName="SapConsultingApp-web1.war" deploy-path="/" handle="module:/resource/SapConsultingApp-web1/SapConsultingApp-web1">
+			<dependency-type>uses</dependency-type>
+		</dependent-module>
+	</wb-module>
+</project-modules>

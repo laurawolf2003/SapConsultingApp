@@ -1,8 +1,19 @@
-# Eclipse IDE
-.project
-.classpath
-.settings/
+# Eclipse IDE – Workspace-Metadaten ignorieren
+/.project
+/.classpath
+/.settings/
 .metadata/
+
+# Eclipse-Projektdateien in Unterordnern NICHT ignorieren (kein Build-Tool)
+!SapConsultingApp-ejb1/.project
+!SapConsultingApp-ejb1/.classpath
+!SapConsultingApp-ejb1/.settings/
+!SapConsultingApp-web1/.project
+!SapConsultingApp-web1/.classpath
+!SapConsultingApp-web1/.settings/
+!SapConsultingApp1/.project
+!SapConsultingApp1/.classpath
+!SapConsultingApp1/.settings/
 bin/
 target/
 tmp/
