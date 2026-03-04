@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<ui:composition template="/template.xhtml">
+
+	<ui:define name="title">Berater-Detail - SAP Consulting App</ui:define>
+	<ui:define name="heading">Berater-Detail &amp; Skills</ui:define>
+
+	<ui:define name="content">
+		<div class="section">
+			<h2>#{requestScope.berater.vollerName}</h2>
+			<p><strong>E-Mail:</strong> #{requestScope.berater.email}</p>
+			<p><strong>Senioritaet:</strong> #{requestScope.berater.senioritaet}</p>
+			<p><strong>Stundensatz:</strong> #{requestScope.berater.stundensatz} EUR</p>
+			<p><strong>Verfuegbar:</strong> #{requestScope.berater.verfuegbar ? 'Ja' : 'Nein'}</p>
+		</div>
+
+		<!-- Skills des Beraters -->
+		<div class="section">
+			<h2>Skills</h2>
+			<h:dataTable value="#{requestScope.berater.skills}" var="s" styleClass="" headerClass="" rowClasses="">
+				<h:column>
+					<f:facet name="header">SAP-Modul</f:facet>
+					#{s.sapModul} - #{s.sapModul.bezeichnung}
+				</h:column>
+				<h:column>
+					<f:facet name="header">Level</f:facet>
+					#{s.level} / 5
+				</h:column>
+				<h:column>
+					<f:facet name="header">Zertifiziert</f:facet>
+					#{s.zertifiziert ? 'Ja' : 'Nein'}
+				</h:column>
+				<h:column>
+					<f:facet name="header">Aktion</f:facet>
+					<form action="#{request.contextPath}/berater-detail" method="post" style="display:inline">
+						<input type="hidden" name="action" value="skillEntfernen" />
+						<input type="hidden" name="beraterId" value="#{requestScope.berater.id}" />
+						<input type="hidden" name="skillId" value="#{s.id}" />
+						<input type="submit" value="Entfernen" class="btn btn-danger" />
+					</form>
+				</h:column>
+			</h:dataTable>
+
+			<!-- Skill hinzufuegen -->
+			<h3>Neuen Skill zuweisen</h3>
+			<form action="#{request.contextPath}/berater-detail" method="post">
+				<input type="hidden" name="action" value="skillZuweisen" />
+				<input type="hidden" name="beraterId" value="#{requestScope.berater.id}" />
+				<div class="form-group">
+					<label for="modul">SAP-Modul:</label>
+					<select id="modul" name="modul">
+						<option value="">-- Modul waehlen --</option>
+						<ui:repeat value="#{app.sapModule}" var="m">
+							<option value="#{m}">#{m} - #{m.bezeichnung}</option>
+						</ui:repeat>
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="level">Level (1-5):</label>
+					<input type="number" id="level" name="level" min="1" max="5" value="3" />
+				</div>
+				<div class="form-group">
+					<label for="zertifiziert">Zertifiziert:</label>
+					<input type="checkbox" id="zertifiziert" name="zertifiziert" />
+				</div>
+				<input type="submit" value="Skill zuweisen" class="btn btn-success" />
+			</form>
+		</div>
+
+		<a href="#{request.contextPath}/berater" class="btn">Zurueck zur Beraterliste</a>
+	</ui:define>
+
+</ui:composition>
+
+</html>
