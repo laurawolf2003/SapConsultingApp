@@ -44,7 +44,7 @@
                     <label for="sapModul">SAP-Modul:</label>
                     <select id="sapModul" name="sapModul" required="required">
                         <option value="">-- Modul waehlen --</option>
-                        <ui:repeat value="#{requestScope.sapModule}" var="m">
+                        <ui:repeat value="#{app.sapModule}" var="m">
                             <option value="#{m}"
                                     selected="#{requestScope.formProjekt.sapModul == m ? 'selected' : null}">
                                 #{m.bezeichnung}

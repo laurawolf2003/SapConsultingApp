@@ -4,14 +4,15 @@ import java.io.IOException;
 import java.math.BigDecimal;
 
 import javax.ejb.EJB;
+import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import de.consulting.cdi.FlashMessage;
 import de.consulting.model.Berater;
-import de.consulting.model.SapModul;
 import de.consulting.service.BeraterService;
 
 @WebServlet("/berater")
@@ -22,15 +23,15 @@ public class BeraterServlet extends HttpServlet {
     @EJB(lookup = "java:global/SapConsultingApp/SapConsultingApp-ejb/BeraterService!de.consulting.service.BeraterService")
     private BeraterService beraterService;
 
+    @Inject
+    private FlashMessage flashMessage;
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        ServletUtil.ladFlashMsg(req);
 
         req.setAttribute("beraterListe", beraterService.alleBerater());
-        req.setAttribute("sapModule", SapModul.values());
-        req.setAttribute("senioritaetWerte", Berater.Senioritaet.values());
 
         // Berater zum Bearbeiten laden (optionaler id-Parameter)
         String idParam = req.getParameter("id");
@@ -57,7 +58,7 @@ public class BeraterServlet extends HttpServlet {
         try {
             if ("loeschen".equals(action)) {
                 beraterService.loeschen(Long.parseLong(req.getParameter("id")));
-                ServletUtil.setFlashMsg(req, "Berater geloescht.", "info");
+                flashMessage.setze("Berater geloescht.", "info");
 
             } else if ("speichern".equals(action)) {
                 Berater berater = new Berater();
@@ -72,10 +73,10 @@ public class BeraterServlet extends HttpServlet {
                 berater.setStundensatz(new BigDecimal(req.getParameter("stundensatz").replace(",", ".")));
                 berater.setVerfuegbar("on".equals(req.getParameter("verfuegbar")));
                 beraterService.speichern(berater);
-                ServletUtil.setFlashMsg(req, "Berater gespeichert.", "info");
+                flashMessage.setze("Berater gespeichert.", "info");
             }
         } catch (Exception e) {
-            ServletUtil.setFlashMsg(req, "Fehler: " + e.getMessage(), "error");
+            flashMessage.setze("Fehler: " + e.getMessage(), "error");
         }
 
         resp.sendRedirect(req.getContextPath() + "/berater");

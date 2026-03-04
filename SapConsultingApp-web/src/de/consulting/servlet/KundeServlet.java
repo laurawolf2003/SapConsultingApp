@@ -3,12 +3,14 @@ package de.consulting.servlet;
 import java.io.IOException;
 
 import javax.ejb.EJB;
+import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import de.consulting.cdi.FlashMessage;
 import de.consulting.model.Kunde;
 import de.consulting.service.KundeService;
 
@@ -20,11 +22,13 @@ public class KundeServlet extends HttpServlet {
     @EJB(lookup = "java:global/SapConsultingApp/SapConsultingApp-ejb/KundeService!de.consulting.service.KundeService")
     private KundeService kundeService;
 
+    @Inject
+    private FlashMessage flashMessage;
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        ServletUtil.ladFlashMsg(req);
 
         req.setAttribute("kunden", kundeService.alleKunden());
 
@@ -52,7 +56,7 @@ public class KundeServlet extends HttpServlet {
         try {
             if ("loeschen".equals(action)) {
                 kundeService.loeschen(Long.parseLong(req.getParameter("id")));
-                ServletUtil.setFlashMsg(req, "Kunde geloescht.", "info");
+                flashMessage.setze("Kunde geloescht.", "info");
 
             } else if ("speichern".equals(action)) {
                 Kunde kunde = new Kunde();
@@ -66,10 +70,10 @@ public class KundeServlet extends HttpServlet {
                 kunde.setAdresse(req.getParameter("adresse"));
                 kunde.setEmail(req.getParameter("email"));
                 kundeService.speichern(kunde);
-                ServletUtil.setFlashMsg(req, "Kunde gespeichert.", "info");
+                flashMessage.setze("Kunde gespeichert.", "info");
             }
         } catch (Exception e) {
-            ServletUtil.setFlashMsg(req, "Fehler: " + e.getMessage(), "error");
+            flashMessage.setze("Fehler: " + e.getMessage(), "error");
         }
 
         resp.sendRedirect(req.getContextPath() + "/kunden");

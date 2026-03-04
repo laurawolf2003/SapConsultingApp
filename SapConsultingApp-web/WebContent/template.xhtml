@@ -25,9 +25,9 @@
     <div class="container">
         <h1><ui:insert name="heading">SAP Consulting App</ui:insert></h1>
 
-        <!-- Flash-Nachrichten vom Servlet -->
-        <h:panelGroup rendered="#{not empty requestScope.flashMsg}">
-            <div class="messages #{requestScope.flashSeverity}">#{requestScope.flashMsg}</div>
+        <!-- Flash-Nachrichten vom Servlet (CDI FlashMessage Bean) -->
+        <h:panelGroup rendered="#{flashMessage.vorhanden}">
+            <div class="messages #{flashMessage.typ}">#{flashMessage.nachricht}</div>
         </h:panelGroup>
 
         <ui:insert name="content">

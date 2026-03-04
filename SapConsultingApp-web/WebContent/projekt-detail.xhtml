@@ -25,7 +25,7 @@
                 <input type="hidden" name="action" value="statusAendern" />
                 <input type="hidden" name="projektId" value="#{requestScope.projekt.id}" />
                 <select name="neuerStatus">
-                    <ui:repeat value="#{requestScope.statusWerte}" var="s">
+                    <ui:repeat value="#{app.statusWerte}" var="s">
                         <option value="#{s}"
                                 selected="#{requestScope.projekt.status == s ? 'selected' : null}">#{s}</option>
                     </ui:repeat>

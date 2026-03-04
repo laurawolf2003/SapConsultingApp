@@ -50,6 +50,15 @@
             <transaction-type>Container</transaction-type>
         </session>
 
+        <session>
+            <display-name>SystemKonfiguration</display-name>
+            <ejb-name>SystemKonfiguration</ejb-name>
+            <ejb-class>de.consulting.service.SystemKonfiguration</ejb-class>
+            <session-type>Singleton</session-type>
+            <transaction-type>Container</transaction-type>
+            <init-on-startup>true</init-on-startup>
+        </session>
+
     </enterprise-beans>
 
 </ejb-jar>

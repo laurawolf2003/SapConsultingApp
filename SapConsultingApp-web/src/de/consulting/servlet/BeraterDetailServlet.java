@@ -3,12 +3,14 @@ package de.consulting.servlet;
 import java.io.IOException;
 
 import javax.ejb.EJB;
+import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import de.consulting.cdi.FlashMessage;
 import de.consulting.model.Berater;
 import de.consulting.model.SapModul;
 import de.consulting.service.BeraterService;
@@ -25,11 +27,13 @@ public class BeraterDetailServlet extends HttpServlet {
     @EJB(lookup = "java:global/SapConsultingApp/SapConsultingApp-ejb/SkillService!de.consulting.service.SkillService")
     private SkillService skillService;
 
+    @Inject
+    private FlashMessage flashMessage;
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        ServletUtil.ladFlashMsg(req);
 
         String idParam = req.getParameter("id");
         if (idParam == null || idParam.isEmpty()) {
@@ -44,7 +48,6 @@ public class BeraterDetailServlet extends HttpServlet {
         }
 
         req.setAttribute("berater", berater);
-        req.setAttribute("sapModule", SapModul.values());
 
         req.getRequestDispatcher("/berater-detail.xhtml").forward(req, resp);
     }
@@ -63,14 +66,14 @@ public class BeraterDetailServlet extends HttpServlet {
                 int level = Integer.parseInt(req.getParameter("level"));
                 boolean zertifiziert = "on".equals(req.getParameter("zertifiziert"));
                 skillService.skillZuweisen(Long.parseLong(beraterId), modul, level, zertifiziert);
-                ServletUtil.setFlashMsg(req, "Skill zugewiesen.", "info");
+                flashMessage.setze("Skill zugewiesen.", "info");
 
             } else if ("skillEntfernen".equals(action)) {
                 skillService.skillEntfernen(Long.parseLong(req.getParameter("skillId")));
-                ServletUtil.setFlashMsg(req, "Skill entfernt.", "info");
+                flashMessage.setze("Skill entfernt.", "info");
             }
         } catch (Exception e) {
-            ServletUtil.setFlashMsg(req, "Fehler: " + e.getMessage(), "error");
+            flashMessage.setze("Fehler: " + e.getMessage(), "error");
         }
 
         resp.sendRedirect(req.getContextPath() + "/berater-detail?id=" + beraterId);

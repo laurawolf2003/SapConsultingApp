@@ -5,12 +5,14 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 
 import javax.ejb.EJB;
+import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import de.consulting.cdi.FlashMessage;
 import de.consulting.model.Kunde;
 import de.consulting.model.Projekt;
 import de.consulting.model.ProjektStatus;
@@ -33,16 +35,16 @@ public class ProjektServlet extends HttpServlet {
     @EJB(lookup = "java:global/SapConsultingApp/SapConsultingApp-ejb/BeraterService!de.consulting.service.BeraterService")
     private BeraterService beraterService;
 
+    @Inject
+    private FlashMessage flashMessage;
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        ServletUtil.ladFlashMsg(req);
 
         req.setAttribute("projekte", projektService.alleProjekte());
         req.setAttribute("alleKunden", kundeService.alleKunden());
-        req.setAttribute("sapModule", SapModul.values());
-        req.setAttribute("statusWerte", ProjektStatus.values());
 
         // Projekt zum Bearbeiten laden (optionaler id-Parameter)
         String idParam = req.getParameter("id");
@@ -69,7 +71,7 @@ public class ProjektServlet extends HttpServlet {
         try {
             if ("loeschen".equals(action)) {
                 projektService.loeschen(Long.parseLong(req.getParameter("id")));
-                ServletUtil.setFlashMsg(req, "Projekt geloescht.", "info");
+                flashMessage.setze("Projekt geloescht.", "info");
 
             } else if ("speichern".equals(action)) {
                 Projekt projekt = new Projekt();
@@ -108,10 +110,10 @@ public class ProjektServlet extends HttpServlet {
                 }
 
                 projektService.speichern(projekt);
-                ServletUtil.setFlashMsg(req, "Projekt gespeichert.", "info");
+                flashMessage.setze("Projekt gespeichert.", "info");
             }
         } catch (Exception e) {
-            ServletUtil.setFlashMsg(req, "Fehler: " + e.getMessage(), "error");
+            flashMessage.setze("Fehler: " + e.getMessage(), "error");
         }
 
         resp.sendRedirect(req.getContextPath() + "/projekte");

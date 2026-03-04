@@ -9,12 +9,14 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ejb.EJB;
+import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import de.consulting.cdi.FlashMessage;
 import de.consulting.model.Projekt;
 import de.consulting.service.ProjektService;
 import de.consulting.service.ZeiterfassungService;
@@ -54,6 +56,9 @@ public class DashboardServlet extends HttpServlet {
 
     @EJB(lookup = "java:global/SapConsultingApp/SapConsultingApp-ejb/ZeiterfassungService!de.consulting.service.ZeiterfassungService")
     private ZeiterfassungService zeitService;
+
+    @Inject
+    private FlashMessage flashMessage;
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)

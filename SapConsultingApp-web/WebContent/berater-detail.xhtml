@@ -56,7 +56,7 @@
                     <label for="modul">SAP-Modul:</label>
                     <select id="modul" name="modul">
                         <option value="">-- Modul waehlen --</option>
-                        <ui:repeat value="#{requestScope.sapModule}" var="m">
+                        <ui:repeat value="#{app.sapModule}" var="m">
                             <option value="#{m}">#{m} - #{m.bezeichnung}</option>
                         </ui:repeat>
                     </select>

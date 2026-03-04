@@ -2,8 +2,10 @@ package de.consulting.service;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -20,6 +22,9 @@ public class ZeiterfassungService implements Serializable {
 
     @PersistenceContext(unitName = "SapConsultingPU")
     private EntityManager em;
+
+    @EJB
+    private SystemKonfiguration systemKonfiguration;
 
     public List<Zeiteintrag> findByProjekt(Long projektId) {
         return em.createNamedQuery("Zeiteintrag.findByProjekt", Zeiteintrag.class)
@@ -67,6 +72,12 @@ public class ZeiterfassungService implements Serializable {
             throw new IllegalArgumentException("Projekt oder Berater nicht gefunden.");
         }
 
+        // BR-7: Maximale Stunden pro Tag pruefen
+        if (eintrag.getStunden().compareTo(new BigDecimal(systemKonfiguration.getMaxStundenProTag())) > 0) {
+            throw new IllegalArgumentException(
+                "Maximale Stunden pro Tag (" + systemKonfiguration.getMaxStundenProTag() + "h) ueberschritten.");
+        }
+
         // BR-2: Nur aktive Projekte
         if (projekt.getStatus() != ProjektStatus.AKTIV) {
             throw new IllegalStateException(
@@ -83,13 +94,16 @@ public class ZeiterfassungService implements Serializable {
         eintrag.setBerater(berater);
         em.persist(eintrag);
 
-        // BR-6: Budget-Warnung
+        // BR-6: Budget-Warnung ab konfiguriertem Schwellenwert
         String warnung = null;
         if (projekt.getBudgetStunden() > 0) {
             BigDecimal gesamtStunden = gesamtStundenByProjekt(projekt.getId());
-            if (gesamtStunden.intValue() > projekt.getBudgetStunden()) {
-                warnung = "WARNUNG: Budget-Stunden ueberschritten! Gebucht: " + gesamtStunden
-                        + "h / Budget: " + projekt.getBudgetStunden() + "h";
+            BigDecimal auslastung = gesamtStunden
+                    .multiply(new BigDecimal("100"))
+                    .divide(new BigDecimal(projekt.getBudgetStunden()), 0, RoundingMode.HALF_UP);
+            if (auslastung.intValue() >= systemKonfiguration.getBudgetWarnungSchwellenwert()) {
+                warnung = "WARNUNG: Budget zu " + auslastung + "% ausgelastet! ("
+                        + gesamtStunden + "h / " + projekt.getBudgetStunden() + "h)";
             }
         }
 

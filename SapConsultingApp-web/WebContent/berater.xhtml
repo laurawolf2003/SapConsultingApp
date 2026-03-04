@@ -38,7 +38,7 @@
                     <label for="senioritaet">Senioritaet:</label>
                     <select id="senioritaet" name="senioritaet" required="required">
                         <option value="">-- Senioritaet waehlen --</option>
-                        <ui:repeat value="#{requestScope.senioritaetWerte}" var="s">
+                        <ui:repeat value="#{app.senioritaetWerte}" var="s">
                             <option value="#{s}"
                                     selected="#{requestScope.formBerater.senioritaet == s ? 'selected' : null}">#{s}</option>
                         </ui:repeat>

@@ -338,10 +338,10 @@ SapConsultingApp/                              ← Git-Repo-Root / EAR Eclipse-P
 │       └── application.xml                    ← EAR-Deskriptor (EJB + Web Module)
 │
 ├── SapConsultingApp-ejb/                      ← Eclipse EJB-Projekt
-│   ├── ejbModule/
-│   │   └── META-INF/
-│   │       └── persistence.xml                ← JPA 2.1 Config (SapConsultingPU)
-│   └── src/                                   ← Java Source Folder
+│   └── ejbModule/                             ← Source-Ordner (Java + Deployment-Deskriptoren)
+│       ├── META-INF/
+│       │   ├── ejb-jar.xml                    ← EJB-Deployment-Deskriptor
+│       │   └── persistence.xml                ← JPA 2.1 Config (SapConsultingPU)
 │       └── de/
 │           └── consulting/
 │               ├── model/                     ← JPA Entities
@@ -353,26 +353,30 @@ SapConsultingApp/                              ← Git-Repo-Root / EAR Eclipse-P
 │               │   ├── SapModul.java          ← Enum
 │               │   └── ProjektStatus.java     ← Enum
 │               │
-│               └── service/                   ← EJB Stateless Session Beans (@Stateless)
-│                   ├── ProjektService.java
-│                   ├── BeraterService.java
-│                   ├── ZeiterfassungService.java
-│                   ├── SkillService.java
-│                   └── KundeService.java
+│               └── service/                   ← EJB Session Beans
+│                   ├── ProjektService.java    ← @Stateless
+│                   ├── BeraterService.java    ← @Stateless
+│                   ├── ZeiterfassungService.java ← @Stateless
+│                   ├── SkillService.java      ← @Stateless
+│                   ├── KundeService.java      ← @Stateless
+│                   └── SystemKonfiguration.java ← @Singleton @Startup
 │
 ├── SapConsultingApp-web/                      ← Eclipse Dynamic Web-Projekt
 │   ├── src/                                   ← Java Source Folder
 │   │   └── de/
 │   │       └── consulting/
-│   │           └── servlet/                   ← HTTP-Controller (@WebServlet)
+│   │           ├── servlet/                   ← HTTP-Controller (@WebServlet)
 │   │           │   ├── BeraterServlet.java
 │   │           │   ├── BeraterDetailServlet.java
 │   │           │   ├── ProjektServlet.java
 │   │           │   ├── ProjektDetailServlet.java
 │   │           │   ├── KundeServlet.java
 │   │           │   ├── ZeiterfassungServlet.java
-│   │           │   ├── DashboardServlet.java
-│   │           │   └── ServletUtil.java       ← Flash-Message-Hilfsmethoden
+│   │           │   └── DashboardServlet.java
+│   │           │
+│   │           └── cdi/                       ← CDI Beans
+│   │               ├── AppKonfiguration.java  ← @Named @ApplicationScoped
+│   │               └── FlashMessage.java      ← @Named @SessionScoped
 │   │
 │   └── WebContent/                            ← Web Root
 │       ├── META-INF/

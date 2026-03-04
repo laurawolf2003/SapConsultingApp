@@ -7,12 +7,14 @@ import java.util.Collections;
 import java.util.Date;
 
 import javax.ejb.EJB;
+import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import de.consulting.cdi.FlashMessage;
 import de.consulting.model.Berater;
 import de.consulting.model.Projekt;
 import de.consulting.model.ProjektStatus;
@@ -35,11 +37,13 @@ public class ZeiterfassungServlet extends HttpServlet {
     @EJB(lookup = "java:global/SapConsultingApp/SapConsultingApp-ejb/BeraterService!de.consulting.service.BeraterService")
     private BeraterService beraterService;
 
+    @Inject
+    private FlashMessage flashMessage;
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        ServletUtil.ladFlashMsg(req);
 
         req.setAttribute("aktiveProjekte", projektService.findByStatus(ProjektStatus.AKTIV));
         req.setAttribute("alleBerater", beraterService.alleBerater());
@@ -87,12 +91,12 @@ public class ZeiterfassungServlet extends HttpServlet {
 
             String warnung = zeitService.buchen(eintrag);
             if (warnung != null) {
-                ServletUtil.setFlashMsg(req, warnung, "warn");
+                flashMessage.setze(warnung, "warn");
             } else {
-                ServletUtil.setFlashMsg(req, "Zeiteintrag gebucht.", "info");
+                flashMessage.setze("Zeiteintrag gebucht.", "info");
             }
         } catch (Exception e) {
-            ServletUtil.setFlashMsg(req, "Fehler: " + e.getMessage(), "error");
+            flashMessage.setze("Fehler: " + e.getMessage(), "error");
         }
 
         String redirect = req.getContextPath() + "/zeitbuchung";
