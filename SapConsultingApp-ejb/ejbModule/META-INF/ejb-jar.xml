@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ejb-jar xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+                             http://xmlns.jcp.org/xml/ns/javaee/ejb-jar_3_2.xsd"
+         version="3.2">
+
+    <display-name>SapConsultingApp-ejb</display-name>
+    <description>EJB-Modul des SAP Consulting Management Systems — enthaelt Stateless Session Beans und JPA Entities</description>
+
+    <enterprise-beans>
+
+        <session>
+            <display-name>BeraterService</display-name>
+            <ejb-name>BeraterService</ejb-name>
+            <ejb-class>de.consulting.service.BeraterService</ejb-class>
+            <session-type>Stateless</session-type>
+            <transaction-type>Container</transaction-type>
+        </session>
+
+        <session>
+            <display-name>KundeService</display-name>
+            <ejb-name>KundeService</ejb-name>
+            <ejb-class>de.consulting.service.KundeService</ejb-class>
+            <session-type>Stateless</session-type>
+            <transaction-type>Container</transaction-type>
+        </session>
+
+        <session>
+            <display-name>ProjektService</display-name>
+            <ejb-name>ProjektService</ejb-name>
+            <ejb-class>de.consulting.service.ProjektService</ejb-class>
+            <session-type>Stateless</session-type>
+            <transaction-type>Container</transaction-type>
+        </session>
+
+        <session>
+            <display-name>SkillService</display-name>
+            <ejb-name>SkillService</ejb-name>
+            <ejb-class>de.consulting.service.SkillService</ejb-class>
+            <session-type>Stateless</session-type>
+            <transaction-type>Container</transaction-type>
+        </session>
+
+        <session>
+            <display-name>ZeiterfassungService</display-name>
+            <ejb-name>ZeiterfassungService</ejb-name>
+            <ejb-class>de.consulting.service.ZeiterfassungService</ejb-class>
+            <session-type>Stateless</session-type>
+            <transaction-type>Container</transaction-type>
+        </session>
+
+    </enterprise-beans>
+
+</ejb-jar>

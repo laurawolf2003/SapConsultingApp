@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<ui:composition template="/template.xhtml">
+
+    <ui:define name="title">Projekt-Detail - SAP Consulting App</ui:define>
+    <ui:define name="heading">Projekt-Detail</ui:define>
+
+    <ui:define name="content">
+        <div class="section">
+            <h2>#{requestScope.projekt.bezeichnung}</h2>
+            <p><strong>Kunde:</strong> #{requestScope.projekt.kunde.firmenname}</p>
+            <p><strong>SAP-Modul:</strong> #{requestScope.projekt.sapModul}</p>
+            <p><strong>Status:</strong> #{requestScope.projekt.status}</p>
+            <p><strong>Budget:</strong> #{requestScope.projekt.budgetStunden} Stunden /
+                #{requestScope.projekt.budgetEuro} EUR</p>
+
+            <!-- Status aendern -->
+            <h3>Status aendern</h3>
+            <form action="#{request.contextPath}/projekt-detail" method="post">
+                <input type="hidden" name="action" value="statusAendern" />
+                <input type="hidden" name="projektId" value="#{requestScope.projekt.id}" />
+                <select name="neuerStatus">
+                    <ui:repeat value="#{requestScope.statusWerte}" var="s">
+                        <option value="#{s}"
+                                selected="#{requestScope.projekt.status == s ? 'selected' : null}">#{s}</option>
+                    </ui:repeat>
+                </select>
+                <input type="submit" value="Status aendern" class="btn btn-warning" />
+            </form>
+        </div>
+
+        <!-- Zugewiesene Berater -->
+        <div class="section">
+            <h2>Zugewiesene Berater</h2>
+            <h:dataTable value="#{requestScope.projekt.berater}" var="b"
+                         styleClass="" headerClass="" rowClasses="">
+                <h:column>
+                    <f:facet name="header">Name</f:facet>
+                    #{b.vollerName}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Senioritaet</f:facet>
+                    #{b.senioritaet}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Aktion</f:facet>
+                    <form action="#{request.contextPath}/projekt-detail" method="post" style="display:inline">
+                        <input type="hidden" name="action" value="beraterEntfernen" />
+                        <input type="hidden" name="projektId" value="#{requestScope.projekt.id}" />
+                        <input type="hidden" name="beraterId" value="#{b.id}" />
+                        <input type="submit" value="Entfernen" class="btn btn-danger" />
+                    </form>
+                </h:column>
+            </h:dataTable>
+
+            <!-- Berater zuweisen -->
+            <h3>Berater zuweisen</h3>
+            <form action="#{request.contextPath}/projekt-detail" method="post">
+                <input type="hidden" name="action" value="beraterZuweisen" />
+                <input type="hidden" name="projektId" value="#{requestScope.projekt.id}" />
+                <select name="beraterId">
+                    <option value="">-- Berater waehlen --</option>
+                    <ui:repeat value="#{requestScope.verfuegbareBerater}" var="vb">
+                        <option value="#{vb.id}">#{vb.vollerName} (#{vb.senioritaet})</option>
+                    </ui:repeat>
+                </select>
+                <input type="submit" value="Zuweisen" class="btn btn-success" />
+            </form>
+        </div>
+
+        <a href="#{request.contextPath}/projekte" class="btn">Zurueck zur Projektliste</a>
+    </ui:define>
+
+</ui:composition>
+</html>

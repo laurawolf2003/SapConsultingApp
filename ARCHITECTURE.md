@@ -5,7 +5,7 @@
 **Titel:** SAP Consulting Management System  
 **Kontext:** Hochschulprojekt (IU Internationale Hochschule, WS 2025/26) — Fallstudie Jakarta Enterprise Edition (JEE)  
 **Praxispartner:** Software-/Beratungsfirma im SAP-Umfeld  
-**Projektname (Eclipse):** `SapConsultingApp`
+**Projektname (Eclipse):** `SapConsultingApp` (EAR), `SapConsultingApp-ejb` (EJB), `SapConsultingApp-web` (Web)
 
 ### Zielsetzung
 
@@ -65,11 +65,13 @@ Für die Aufgabe werden folgende Bereiche modelliert:
 | **Dynamic Web Module** | 3.1 | = Servlet 3.1 Spec |
 | **JPA** | 2.1 | EclipseLink (kommt mit Payara) |
 | **MySQL** | 8.0 | Relationale Datenbank |
-| **JSF** | 2.3 | In Payara 5.1 enthalten — **Schwerpunkt** |
-| **CDI** | 2.0 | In Payara 5.1 enthalten — **Schwerpunkt** |
+| **JSF** | 2.3 | In Payara 5.1 enthalten — Facelets als View-Technologie |
+| **EJB** | 3.2 | `@Stateless` Session Beans als Business-Services |
+| **CDI** | 2.0 | In Payara 5.1 enthalten — aktiviert via `beans.xml` |
+| **Servlet API** | 3.1 | `@WebServlet` HTTP-Controller — **Schwerpunkt Präsentation** |
 | **Bean Validation** | 2.0 | In Payara 5.1 enthalten |
 | **Build-Tool** | ❌ **Keines** | Kein Maven, kein Gradle, kein Ant |
-| **IDE** | Eclipse IDE for Enterprise Java Developers | Dynamic Web Project |
+| **IDE** | Eclipse IDE for Enterprise Java Developers | EAR-Projekt (3 Eclipse-Projekte: EAR + EJB + Web) |
 
 > **Hinweis:** Abweichungen von den Versionen sind nur zulässig, wenn keine Kompatibilitätsprobleme oder zusätzlicher Installationsaufwand entstehen.
 
@@ -79,29 +81,39 @@ Für die Aufgabe werden folgende Bereiche modelliert:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│              PRÄSENTATIONSSCHICHT (minimal)              │
+│              PRÄSENTATIONSSCHICHT                        │
 │                                                         │
-│   JSF 2.3 Facelets (.xhtml)                            │
-│   ├── template.xhtml (Master-Layout)                    │
-│   ├── index.xhtml (Dashboard)                           │
-│   ├── projekte.xhtml                                    │
-│   ├── berater.xhtml                                     │
+│   Servlet 3.1 — HTTP-Controller (@WebServlet)           │
+│   ├── BeraterServlet        (/berater)                  │
+│   ├── BeraterDetailServlet  (/berater-detail)           │
+│   ├── ProjektServlet        (/projekte)                 │
+│   ├── ProjektDetailServlet  (/projekt-detail)           │
+│   ├── KundeServlet          (/kunden)                   │
+│   ├── ZeiterfassungServlet  (/zeitbuchung)              │
+│   └── DashboardServlet      (/dashboard)                │
+│                                                         │
+│   Verantwortlichkeit:                                   │
+│   • GET: Daten per @EJB laden, in RequestScope setzen,  │
+│          an XHTML-View weiterleiten (forward)           │
+│   • POST: Formular-Parameter parsen, EJB aufrufen,      │
+│           Redirect (Post/Redirect/Get-Pattern)          │
+│                                                         │
+│   JSF 2.3 Facelets — Views (.xhtml)                    │
+│   ├── template.xhtml  (Master-Layout)                   │
+│   ├── index.xhtml     (Dashboard)                       │
+│   ├── projekte.xhtml + projekt-detail.xhtml             │
+│   ├── berater.xhtml  + berater-detail.xhtml             │
 │   ├── kunden.xhtml                                      │
 │   └── zeitbuchung.xhtml                                 │
 │                                                         │
-│   Backing Beans (JSF Controller)                        │
-│   ├── ProjektController   (@Named, @ViewScoped)         │
-│   ├── BeraterController   (@Named, @ViewScoped)         │
-│   ├── ZeitController      (@Named, @ViewScoped)         │
-│   └── DashboardController (@Named, @ViewScoped)         │
-│                                                         │
-│   Converter                                             │
-│   ├── KundeConverter                                    │
-│   └── BeraterConverter                                  │
+│   Views nutzen #{requestScope.xxx} für Servlet-Daten.  │
+│   Formulare POST direkt auf Servlet-URLs.               │
+│   JSF-Komponenten (h:dataTable, ui:repeat,              │
+│   f:convertDateTime) für Darstellung und Templating.    │
 ├─────────────────────────────────────────────────────────┤
 │              ANWENDUNGSSCHICHT (Fokus!)                  │
 │                                                         │
-│   CDI Beans / Services (@ApplicationScoped)             │
+│   EJB 3.2 Stateless Session Beans (@Stateless)         │
 │   ├── ProjektService                                    │
 │   │   └── Projekt-CRUD, Berater-Zuweisung,              │
 │   │       Statusübergänge, Budget-Prüfung               │
@@ -113,6 +125,10 @@ Für die Aufgabe werden folgende Bereiche modelliert:
 │   │   └── Skill-Zuweisung, Skill-Entfernung             │
 │   └── KundeService                                      │
 │       └── Kunden-CRUD                                   │
+│                                                         │
+│   Injektion in Servlets: @EJB                           │
+│   Transaktionen: Container-managed (CMT, Standard:      │
+│   TransactionAttributeType.REQUIRED)                    │
 │                                                         │
 │   Business-Regeln (in Services)                         │
 │   • Skill-Matching bei Berater-Zuweisung                │
@@ -249,7 +265,7 @@ Zwischentabelle: projekt_berater (projekt_id, berater_id)
 ### UC-1: Kundenverwaltung
 **Akteur:** Sachbearbeiter  
 **Beschreibung:** Kunden (Firmenname, Branche, Ansprechpartner, Adresse, E-Mail) anlegen, bearbeiten, löschen und auflisten.  
-**JEE-Technologien:** JPA (Entity `Kunde`, NamedQueries), CDI (`KundeService`), JSF (Kunden-XHTML)
+**JEE-Technologien:** JPA (Entity `Kunde`, NamedQueries), EJB (`KundeService @Stateless`), Servlet (`KundeServlet`), JSF Facelets (`kunden.xhtml`)
 
 ### UC-2: Projektverwaltung mit Statusmaschine
 **Akteur:** Projektmanager  
@@ -258,7 +274,7 @@ Zwischentabelle: projekt_berater (projekt_id, berater_id)
 - Nur gültige Statusübergänge erlaubt (Statusmaschine)
 - Projekt muss einem Kunden zugeordnet sein
 
-**JEE-Technologien:** JPA (Entity `Projekt`, `@Enumerated`, NamedQueries), CDI (`ProjektService` mit `validiereStatusuebergang()`), JSF, Bean Validation (`@NotNull`, `@Size`, `@Min`)
+**JEE-Technologien:** JPA (Entity `Projekt`, `@Enumerated`, NamedQueries), EJB (`ProjektService @Stateless` mit `statusAendern()`), Servlet (`ProjektServlet`, `ProjektDetailServlet`), JSF Facelets, Bean Validation (`@NotNull`, `@Size`, `@Min`)
 
 ### UC-3: Berater einem Projekt zuweisen (Skill-Matching)
 **Akteur:** Projektmanager  
@@ -267,7 +283,7 @@ Zwischentabelle: projekt_berater (projekt_id, berater_id)
 - Berater muss einen Skill für das SAP-Modul des Projekts haben
 - Berater muss als verfügbar markiert sein
 
-**JEE-Technologien:** JPA (`@ManyToMany`, `@JoinTable`), CDI (`ProjektService.beraterZuweisen()`), Bean Validation
+**JEE-Technologien:** JPA (`@ManyToMany`, `@JoinTable`), EJB (`ProjektService.beraterZuweisen()`), Servlet (`ProjektDetailServlet`), Bean Validation
 
 ### UC-4: Zeiterfassung auf Projekte
 **Akteur:** Berater  
@@ -277,22 +293,22 @@ Zwischentabelle: projekt_berater (projekt_id, berater_id)
 - Nur zugewiesene Berater dürfen buchen
 - Budget-Warnung bei Überschreitung (nicht blockierend)
 
-**JEE-Technologien:** JPA (`Zeiteintrag`-Entity, NamedQueries), CDI (`ZeiterfassungService`), JSF (Zeitbuchungsformular), Bean Validation (`@DecimalMin`, `@DecimalMax`)
+**JEE-Technologien:** JPA (`Zeiteintrag`-Entity, NamedQueries), EJB (`ZeiterfassungService @Stateless`), Servlet (`ZeiterfassungServlet`), JSF Facelets (`zeitbuchung.xhtml`), Bean Validation (`@DecimalMin`, `@DecimalMax`)
 
 ### UC-5: Skill-/Kompetenzmanagement
 **Akteur:** Personalverantwortlicher  
 **Beschreibung:** Beratern werden SAP-Modul-Skills (mit Level 1–5 und Zertifizierungsstatus) zugewiesen. Existierende Skills können aktualisiert oder entfernt werden. Berater können nach SAP-Modul-Kompetenz gesucht werden.  
-**JEE-Technologien:** JPA (`Skill`-Entity, `@OneToMany` mit `orphanRemoval`), CDI (`SkillService`), NamedQueries (`Berater.findBySapModul`)
+**JEE-Technologien:** JPA (`Skill`-Entity, `@OneToMany` mit `orphanRemoval`), EJB (`SkillService @Stateless`), Servlet (`BeraterDetailServlet`), NamedQueries (`Berater.findBySapModul`)
 
 ### UC-6: Berater- und Ressourcenverwaltung
 **Akteur:** Personalverantwortlicher  
 **Beschreibung:** Berater (Vorname, Nachname, E-Mail, Seniorität, Stundensatz, Verfügbarkeit) anlegen, bearbeiten und auflisten. Verfügbare Berater filtern. Berater nach SAP-Modul-Kompetenz suchen.  
-**JEE-Technologien:** JPA (Entity `Berater`, NamedQueries), CDI (`BeraterService`), JSF
+**JEE-Technologien:** JPA (Entity `Berater`, NamedQueries), EJB (`BeraterService @Stateless`), Servlet (`BeraterServlet`), JSF Facelets (`berater.xhtml`)
 
 ### UC-7: Dashboard / Projektauslastung
 **Akteur:** Projektmanager / Management  
 **Beschreibung:** Übersicht über alle Projekte mit gebuchten Stunden, Budget-Auslastung in Prozent und abrechenbaren Stunden. Schnellübersicht über Projektstatus.  
-**JEE-Technologien:** JPA (aggregierte Abfragen), JSF (Dashboard-Seite), CDI
+**JEE-Technologien:** JPA (aggregierte Abfragen), EJB (`ZeiterfassungService`, `ProjektService`), Servlet (`DashboardServlet`), JSF Facelets (`index.xhtml`)
 
 ---
 
@@ -303,76 +319,89 @@ Diese Tabelle zeigt, wie die Aufgabenanforderungen auf JEE-Technologien abgebild
 | JEE-Technologie | Einsatz | Klassen/Dateien |
 |---|---|---|
 | **JPA 2.1** | 5 Entities, 2 Enums, `@OneToMany`, `@ManyToOne`, `@ManyToMany`, `@JoinTable`, `@NamedQuery`, `@Enumerated`, `@Temporal` | `model/*` |
-| **CDI 2.0** | `@ApplicationScoped` Services, `@Named` + `@ViewScoped` Controller, `@Inject`, `@PostConstruct` | `service/*`, `controller/*` |
-| **JSF 2.3** | Facelets-Templates, `h:dataTable`, `h:selectOneMenu`, `f:selectItems`, `f:convertDateTime`, Custom Converter | `*.xhtml`, `converter/*` |
-| **Bean Validation** | `@NotNull`, `@Size`, `@Min`, `@Max`, `@DecimalMin`, `@DecimalMax`, `@Positive` | `model/*` |
-| **JTA** | `@Transactional` auf Service-Methoden | `service/*` |
-| **Servlet 3.1** | `web.xml` v3.1, `FacesServlet`-Mapping | `WEB-INF/web.xml` |
+| **EJB 3.2** | `@Stateless` Session Beans als Business-Services; Container-Managed Transactions (CMT); `@EJB`-Injektion in Servlets | `service/*` |
+| **Servlet 3.1** | `@WebServlet` HTTP-Controller: GET (Daten laden, forward zu View), POST (Formular verarbeiten, PRG-Redirect); `web.xml` v3.1 | `servlet/*`, `WEB-INF/web.xml` |
+| **JSF 2.3** | Facelets-Templates (`ui:composition`, `ui:define`), `h:dataTable`, `ui:repeat`, `f:convertDateTime`; Views lesen aus `requestScope` | `*.xhtml` |
+| **CDI 2.0** | `beans.xml` aktiviert CDI im Web-Modul | `WEB-INF/beans.xml` |
+| **Bean Validation** | `@NotNull`, `@Size`, `@Min`, `@Max`, `@DecimalMin`, `@DecimalMax` auf JPA-Entities | `model/*` |
+| **JTA** | Container-managed Transactions via EJB (`@Stateless` + CMT) | `service/*` |
 
 ---
 
-## 8. Projektstruktur (Eclipse Dynamic Web Project)
+## 8. Projektstruktur (Eclipse EAR-Projekt)
 
 ```
-SapConsultingApp/                          ← Eclipse Dynamic Web Project
-├── src/                                   ← Java Source Folder
-│   └── de/
-│       └── consulting/
-│           ├── model/                     ← JPA Entities
-│           │   ├── Kunde.java
-│           │   ├── Projekt.java
-│           │   ├── Berater.java
-│           │   ├── Skill.java
-│           │   ├── Zeiteintrag.java
-│           │   ├── SapModul.java          ← Enum
-│           │   └── ProjektStatus.java     ← Enum
-│           │
-│           ├── service/                   ← CDI Beans (Business-Logik)
-│           │   ├── ProjektService.java
-│           │   ├── BeraterService.java
-│           │   ├── ZeiterfassungService.java
-│           │   ├── SkillService.java
-│           │   └── KundeService.java
-│           │
-│           ├── controller/                ← JSF Backing Beans
-│           │   ├── ProjektController.java
-│           │   ├── BeraterController.java
-│           │   ├── ZeitController.java
-│           │   └── DashboardController.java
-│           │
-│           └── converter/                 ← JSF Converter
-│               ├── KundeConverter.java
-│               └── BeraterConverter.java
+SapConsultingApp/                              ← Git-Repo-Root / EAR Eclipse-Projekt
 │
-├── WebContent/                            ← Web Root
-│   ├── META-INF/
-│   │   └── MANIFEST.MF
-│   │
-│   ├── WEB-INF/
-│   │   ├── web.xml                        ← Servlet 3.1 Config
-│   │   ├── beans.xml                      ← CDI Aktivierung (bean-discovery-mode="all")
-│   │   ├── faces-config.xml               ← JSF 2.3 Config
-│   │   └── classes/
-│   │       └── META-INF/
-│   │           └── persistence.xml        ← JPA 2.1 Config (SapConsultingPU)
-│   │
-│   ├── resources/
-│   │   └── css/
-│   │       └── style.css
-│   │
-│   ├── template.xhtml                     ← JSF Facelets Master-Template
-│   ├── index.xhtml                        ← Dashboard
-│   ├── projekte.xhtml                     ← Projektverwaltung
-│   ├── projekt-detail.xhtml               ← Projekt bearbeiten + Berater zuweisen
-│   ├── berater.xhtml                      ← Beraterübersicht
-│   ├── berater-detail.xhtml               ← Berater + Skills verwalten
-│   ├── kunden.xhtml                       ← Kundenverwaltung
-│   └── zeitbuchung.xhtml                  ← Zeiterfassung
+├── EarContent/                                ← EAR-Inhalt
+│   └── META-INF/
+│       └── application.xml                    ← EAR-Deskriptor (EJB + Web Module)
 │
-└── build/                                 ← Eclipse kompiliert automatisch hierhin
+├── SapConsultingApp-ejb/                      ← Eclipse EJB-Projekt
+│   ├── ejbModule/
+│   │   └── META-INF/
+│   │       └── persistence.xml                ← JPA 2.1 Config (SapConsultingPU)
+│   └── src/                                   ← Java Source Folder
+│       └── de/
+│           └── consulting/
+│               ├── model/                     ← JPA Entities
+│               │   ├── Kunde.java
+│               │   ├── Projekt.java
+│               │   ├── Berater.java
+│               │   ├── Skill.java
+│               │   ├── Zeiteintrag.java
+│               │   ├── SapModul.java          ← Enum
+│               │   └── ProjektStatus.java     ← Enum
+│               │
+│               └── service/                   ← EJB Stateless Session Beans (@Stateless)
+│                   ├── ProjektService.java
+│                   ├── BeraterService.java
+│                   ├── ZeiterfassungService.java
+│                   ├── SkillService.java
+│                   └── KundeService.java
+│
+├── SapConsultingApp-web/                      ← Eclipse Dynamic Web-Projekt
+│   ├── src/                                   ← Java Source Folder
+│   │   └── de/
+│   │       └── consulting/
+│   │           └── servlet/                   ← HTTP-Controller (@WebServlet)
+│   │           │   ├── BeraterServlet.java
+│   │           │   ├── BeraterDetailServlet.java
+│   │           │   ├── ProjektServlet.java
+│   │           │   ├── ProjektDetailServlet.java
+│   │           │   ├── KundeServlet.java
+│   │           │   ├── ZeiterfassungServlet.java
+│   │           │   ├── DashboardServlet.java
+│   │           │   └── ServletUtil.java       ← Flash-Message-Hilfsmethoden
+│   │
+│   └── WebContent/                            ← Web Root
+│       ├── META-INF/
+│       │   └── MANIFEST.MF
+│       ├── WEB-INF/
+│       │   ├── web.xml                        ← Servlet 3.1 Config + FacesServlet
+│       │   ├── beans.xml                      ← CDI Aktivierung (bean-discovery-mode="all")
+│       │   └── faces-config.xml               ← JSF 2.3 Config
+│       ├── resources/
+│       │   └── css/
+│       │       └── style.css
+│       ├── template.xhtml                     ← JSF Facelets Master-Template
+│       ├── index.xhtml                        ← Dashboard (befüllt von DashboardServlet)
+│       ├── projekte.xhtml                     ← Projektverwaltung (befüllt von ProjektServlet)
+│       ├── projekt-detail.xhtml               ← Projekt-Detail (befüllt von ProjektDetailServlet)
+│       ├── berater.xhtml                      ← Beraterübersicht (befüllt von BeraterServlet)
+│       ├── berater-detail.xhtml               ← Skills (befüllt von BeraterDetailServlet)
+│       ├── kunden.xhtml                       ← Kundenverwaltung (befüllt von KundeServlet)
+│       └── zeitbuchung.xhtml                  ← Zeiterfassung (befüllt von ZeiterfassungServlet)
+│
+├── doc/                                       ← Aufgabenstellung und Dokumentation
+├── sql/                                       ← Datenbank-Setup-Skripte
+└── ARCHITECTURE.md
 ```
 
-> **Kein Build-Tool:** Alle Abhängigkeiten kommen vom Payara-5.1-Server-Classpath. Es werden keine zusätzlichen JARs unter `WEB-INF/lib/` benötigt, da Payara 5.1 Full Profile JPA, JSF, CDI, Bean Validation etc. mitbringt.
+> **Kein Build-Tool:** Alle Abhängigkeiten kommen vom Payara-5.1-Server-Classpath. Beide Eclipse-Projekte (`-ejb`, `-web`) referenzieren die Server Runtime Libraries. Das `-web`-Projekt hängt zusätzlich vom `-ejb`-Projekt ab (Java Build Path → Projects).
+>
+> **JNDI-Schema im EAR:** Da die EJBs in einem separaten Modul (`SapConsultingApp-ejb.jar`) laufen, lautet der portable JNDI-Name:
+> `java:global/SapConsultingApp/SapConsultingApp-ejb/<BeanName>!<FQCN>`
 
 ---
 
@@ -449,8 +478,8 @@ FLUSH PRIVILEGES;
 1. **MySQL starten** und Datenbank `sap_consulting` anlegen
 2. **MySQL Connector/J** nach `payara5/glassfish/domains/domain1/lib/` kopieren
 3. **Payara 5.1** starten und JDBC Pool + Resource konfigurieren (Admin Console `:4848`)
-4. **Eclipse:** Rechtsklick auf Projekt → *Run As → Run on Server → Payara 5.1*
-5. **Browser:** `http://localhost:8080/SapConsultingApp/index.xhtml`
+4. **Eclipse:** Rechtsklick auf **`SapConsultingApp`** (EAR-Projekt) → *Run As → Run on Server → Payara 5.1*
+5. **Browser:** `http://localhost:8080/SapConsultingApp/dashboard`
 
 ### Testfluss
 
@@ -469,14 +498,15 @@ Kunde anlegen → Berater anlegen + Skills zuweisen
 | Anforderung (Aufgabenstellung) | Abgedeckt durch |
 |---|---|
 | JPA 2.1 | 5 Entities, `@OneToMany`, `@ManyToMany`, `@ManyToOne`, NamedQueries, Bean Validation |
-| JSF (**Schwerpunkt**) | Facelets-Templates, `h:dataTable`, `h:selectOneMenu`, `f:selectItems`, `f:convertDateTime`, Custom Converter |
-| CDI (**Schwerpunkt**) | `@Named`, `@ViewScoped`, `@ApplicationScoped`, `@Inject`, `@PostConstruct` |
-| Servlet 3.1 | `web.xml` v3.1, FacesServlet-Mapping |
+| JSF (**Präsentationsschicht**) | Facelets-Templates, `h:dataTable`, `ui:repeat`, `f:convertDateTime`; Views lesen `#{requestScope}` |
+| EJB 3.2 (**Anwendungsschicht**) | 5 `@Stateless` Session Beans, Container-Managed Transactions, `@EJB`-Injektion |
+| Servlet 3.1 (**HTTP-Controller**) | 7 `@WebServlet`-Klassen: GET (forward zu JSF-View) + POST (PRG-Redirect) |
+| CDI 2.0 | `beans.xml` aktiviert CDI im Web-Modul (`WEB-INF/beans.xml`) |
 | Persistenzschicht | JPA + MySQL 8.0, `persistence.xml` v2.1, EclipseLink |
-| Anwendungsschicht | 5 Service-Klassen mit Business-Logik (Validierung, Statusmaschine, Skill-Matching) |
-| Präsentationsschicht (minimal) | 7–8 XHTML-Seiten, Master-Template, CSS |
+| Anwendungsschicht | 5 EJB-Service-Klassen mit Business-Logik (Validierung, Statusmaschine, Skill-Matching) |
+| Präsentationsschicht | 7 Servlets als HTTP-Controller + 8 JSF-Facelets-Views, Master-Template, CSS |
 | Realer Unternehmenskontext | SAP-Beratungsfirma: Kunden, Projekte, Berater, Skills, Zeiterfassung |
 | Mind. 5 Use Cases | 7 Use Cases definiert |
-| Kein Build-Tool | Eclipse Dynamic Web Project, Payara-Classpath |
+| Kein Build-Tool | Eclipse EAR-Projekt (3 Projekte: EAR + EJB + Web), Payara-Classpath |
 | GlassFish/Payara 5.1 | Server-Konfiguration + JDBC Pool |
 | Java 1.8 | Keine Java 9+ Features, for-Schleifen statt Streams wo nötig |

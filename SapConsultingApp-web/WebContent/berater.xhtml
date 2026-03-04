@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<ui:composition template="/template.xhtml">
+
+    <ui:define name="title">Berater - SAP Consulting App</ui:define>
+    <ui:define name="heading">Beraterverwaltung</ui:define>
+
+    <ui:define name="content">
+        <!-- Formular: Berater anlegen / bearbeiten -->
+        <div class="section">
+            <h2>#{empty requestScope.formBerater.id ? 'Neuen Berater anlegen' : 'Berater bearbeiten'}</h2>
+            <form action="#{request.contextPath}/berater" method="post">
+                <input type="hidden" name="action" value="speichern" />
+                <h:panelGroup rendered="#{not empty requestScope.formBerater.id}">
+                    <input type="hidden" name="id" value="#{requestScope.formBerater.id}" />
+                </h:panelGroup>
+                <div class="form-group">
+                    <label for="vorname">Vorname:</label>
+                    <input type="text" id="vorname" name="vorname" required="required"
+                           value="#{requestScope.formBerater.vorname}" />
+                </div>
+                <div class="form-group">
+                    <label for="nachname">Nachname:</label>
+                    <input type="text" id="nachname" name="nachname" required="required"
+                           value="#{requestScope.formBerater.nachname}" />
+                </div>
+                <div class="form-group">
+                    <label for="email">E-Mail:</label>
+                    <input type="email" id="email" name="email"
+                           value="#{requestScope.formBerater.email}" />
+                </div>
+                <div class="form-group">
+                    <label for="senioritaet">Senioritaet:</label>
+                    <select id="senioritaet" name="senioritaet" required="required">
+                        <option value="">-- Senioritaet waehlen --</option>
+                        <ui:repeat value="#{requestScope.senioritaetWerte}" var="s">
+                            <option value="#{s}"
+                                    selected="#{requestScope.formBerater.senioritaet == s ? 'selected' : null}">#{s}</option>
+                        </ui:repeat>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="stundensatz">Stundensatz (EUR):</label>
+                    <input type="text" id="stundensatz" name="stundensatz" required="required"
+                           value="#{requestScope.formBerater.stundensatz}" />
+                </div>
+                <div class="form-group">
+                    <label for="verfuegbar">Verfuegbar:</label>
+                    <input type="checkbox" id="verfuegbar" name="verfuegbar"
+                           checked="#{requestScope.formBerater.verfuegbar ? 'checked' : null}" />
+                </div>
+                <input type="submit" value="Speichern" class="btn btn-primary" />
+                <a href="#{request.contextPath}/berater" class="btn">Abbrechen</a>
+            </form>
+        </div>
+
+        <!-- Tabelle: Alle Berater -->
+        <div class="section">
+            <h2>Beraterliste</h2>
+            <h:dataTable value="#{requestScope.beraterListe}" var="b"
+                         styleClass="" headerClass="" rowClasses="">
+                <h:column>
+                    <f:facet name="header">Name</f:facet>
+                    #{b.vollerName}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">E-Mail</f:facet>
+                    #{b.email}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Senioritaet</f:facet>
+                    #{b.senioritaet}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Stundensatz</f:facet>
+                    #{b.stundensatz} EUR
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Verfuegbar</f:facet>
+                    #{b.verfuegbar ? 'Ja' : 'Nein'}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Aktionen</f:facet>
+                    <a href="#{request.contextPath}/berater?id=#{b.id}" class="btn btn-primary">Bearbeiten</a>
+                    <a href="#{request.contextPath}/berater-detail?id=#{b.id}" class="btn btn-success">Skills</a>
+                    <form action="#{request.contextPath}/berater" method="post" style="display:inline">
+                        <input type="hidden" name="action" value="loeschen" />
+                        <input type="hidden" name="id" value="#{b.id}" />
+                        <input type="submit" value="Loeschen" class="btn btn-danger"
+                               onclick="return confirm('Wirklich loeschen?')" />
+                    </form>
+                </h:column>
+            </h:dataTable>
+        </div>
+    </ui:define>
+
+</ui:composition>
+</html>
